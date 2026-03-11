@@ -103,6 +103,9 @@
 		padding: 5px;
 		height: 52px;
 	}
+	.chatType button:active {
+		filter: brightness(85%);
+	}
 	.chatType img {
 		width: 20px;
 		filter: invert(1);
@@ -131,7 +134,7 @@
 	}
 	button {
 		border: none;
-		background: #09f;
+		background: #0a3;
 		color: white;
 	}
 	button:active {
@@ -159,11 +162,15 @@
 		</div>
 		<div class="chatFrame">
 			<div class="chatBox">
-			
+				<div id="chatBoxTemplate">
+					<h5>rookiecookie</h5>
+					<p>How's your day going, fellow?</p>
+					<h6>Today | 11:59pm</h6>
+				</div>
 			</div>
 			<div class="chatType colTheme1">
 				<textarea id="chatInput" placeholder="Enter message here..."></textarea>
-				<button>
+				<button onclick="send()">
 					<img src="icons/send.svg">
 					<p>Send</p>
 				</button>
@@ -174,11 +181,7 @@
 </body>
 <script>
 	chatInput.addEventListener('input', function() {
-		let sendButton = this.parentElement.children[1];
-		sendButton.style.height = 0;
-		this.style.height = 'auto';         // reset height
-		this.style.height = this.scrollHeight + 'px';  // grow with content
-		sendButton.style.height = this.style.height;
+		syncChatSize();
 		this.parentElement.children[2].innerHTML = (150 - chatInput.value.length) + " characters left"
 	});
 	chatInput.onkeypress = function(ev){
@@ -186,12 +189,26 @@
 			ev.preventDefault()
 		if(ev.key == "Enter"){
 			ev.preventDefault();
-			this.value = ''
+			send();
 		}
-		let sendButton = this.parentElement.children[1];
+		syncChatSize();
+	}
+	
+	function syncChatSize(){
+		let sendButton = chatInput.parentElement.children[1];
 		sendButton.style.height = 0;
-		this.style.height = 'auto';         // reset height
-		this.style.height = this.scrollHeight + 'px';  // grow with content
-		sendButton.style.height = this.style.height;
+		chatInput.style.height = 'auto';
+		chatInput.style.height = chatInput.scrollHeight + 'px';
+		sendButton.style.height = chatInput.style.height;
+	}
+	
+	function send(){
+		addChat(chatInput)
+		chatInput.value = '';
+		syncChatSize();
+	}
+	
+	function addChat(content, time, sender){
+		
 	}
 </script>
