@@ -7,6 +7,13 @@
 		font-family: archivo;
 		src: url(font.ttf);
 	}
+	:root {
+		--theme1: #fff;
+		--theme2: #ddd;
+		--theme3: #333;
+		--theme4: rgba(50, 50, 50, 0.6);
+		--theme5: #8cff8c;
+	}
 	* {
 		margin: 0;
 		font-family: archivo;
@@ -24,13 +31,20 @@
 		transition: opacity 3s;
 	}
 	.colTheme1 {
-		background: #fff;
+		background: var(--theme1);
+		transition: background 0.5s;
 	}
 	.colTheme2 {
-		background: #ddd;
+		background: var(--theme2);
+		transition: background 0.5s;
+	}
+	.colTheme3 {
+		background: var(--theme5);
+		transition: background 0.5s;
 	}
 	.texTheme1 {
-		color: #333;
+		color: var(--theme3);
+		transition: color 0.5s;
 	}
 	#mobileView > .header {
 		border-radius: 0px 0px 20px 20px;
@@ -181,9 +195,6 @@
 		flex: 1;
 		scale: 0.7;
 	}
-	.colTheme3 {
-		background: #c8ffc8
-	}
 	.yourChat {
 		display: flex;
 		flex-direction: column;
@@ -237,7 +248,7 @@
 		z-index: 0
 	}
 	.blurText {
-		color: rgba(50, 50, 50, 0.6);
+		color: var(--theme4);
 	}
 	.youframe {
 		position: fixed;
@@ -279,6 +290,38 @@
 		opacity: 0.3;
 		border-radius: 5px;
 	}
+	.appFrame {
+		position: fixed;
+		width: 100%;
+		height: 100%;
+		display: none;
+	}
+	.appFrame > div {
+		margin: 120px 27px 0px 27px;
+	}
+	#darkMode {
+		width: max-content;
+		border-radius: 100px;
+		overflow: hidden;
+		position: relative;
+	}
+	#darkMode div:last-child {
+		display: flex;
+	}
+	#darkMode p {
+		width: min-content;
+		padding: 7px 24px 7px 24px;
+		z-index: 1
+	}
+	#darkMode div:first-child {
+		position: absolute;
+		height: 100%;
+		width: 50%;
+		border-radius: 100px;
+		scale: 0.9 0.8;
+		left: 0%;
+		transition: left 0.2s;
+	}
 </style>
 <body>
 	<img class="backImg" src="images/mountain.jpg">
@@ -294,7 +337,7 @@
 				<div class="tabHead colTheme1"></div>
 				<div>
 					<p class="blurText">Info</p>
-					<p class="selectedText">Chat</p>
+					<p class="texTheme1">Chat</p>
 					<p class="blurText">You</p>
 					<p class="blurText">App</p>
 				</div>
@@ -304,8 +347,8 @@
 			<div class="chatBox">
 				<div class="theirChat" id="chatTempThem">
 					<div class="colTheme1">
-						<p class="chatterName">burgerKing22</p>
-						<p class="chatterContent">Good day, everyone! Just asking, you think this app is great for resume. </p>
+						<p class="chatterName texTheme1">burgerKing22</p>
+						<p class="chatterContent texTheme1">Good day, everyone! Just asking, you think this app is great for resume. </p>
 					</div>
 					<p class="chatTime">Today | 4:30am</p>
 				</div>
@@ -316,8 +359,8 @@
 							<img src="icons/delete.svg">
 						</div>
 						<div class="colTheme3">
-							<p class="chatterName">You</p>
-							<p class="chatterContent">Good day, everyone! Just asking, you think this app is great for resume. </p>
+							<p class="chatterName texTheme1">You</p>
+							<p class="chatterContent texTheme1">Good day, everyone! Just asking, you think this app is great for resume. </p>
 						</div>
 					</div>
 					<p class="chatTime">Today | 4:30am</p>
@@ -326,7 +369,7 @@
 				<p id="endofmessage">End of message.</p>
 			</div>
 			<div class="chatType colTheme1">
-				<textarea id="chatInput" placeholder="Enter message here..."></textarea>
+				<textarea id="chatInput" class="texTheme1" placeholder="Enter message here..."></textarea>
 				<button onclick="send()">
 					<img src="icons/send.svg">
 					<p>Send</p>
@@ -344,6 +387,18 @@
 					<button onclick="changeUsername()">Change</button>
 				</div>
 				<h6>Note: Changing your username will disassociate your past chats. Once done, you cannot bring back your old username.</h6>
+			</div>
+		</div>
+		<div class="page appFrame colTheme2">
+			<div>
+				<div id="darkMode" class="colTheme1">
+					<div class="colTheme2"></div>
+					<div class="texTheme1">
+						<p>Light</p>
+						<p>Dark</p>
+					</div>
+				</div>
+				<button style="display: none">Install the app</button>
 			</div>
 		</div>
 	</div>
@@ -447,9 +502,9 @@
 	const preloadedImages = [];
 
 	imagesToPreload.forEach(src => {
-	  const img = new Image();  // create an off-DOM image
-	  img.src = src;             // start loading
-	  preloadedImages.push(img); // store reference
+	  const img = new Image();
+	  img.src = src;   
+	  preloadedImages.push(img);
 	});
 	setInterval(changeBackground, 12000);
 	let imgIndex = 2;
@@ -494,6 +549,42 @@
 			usernameButton.style.opacity = 1
 		}
 	}
+	function darken(){
+		document.documentElement.style.setProperty('--theme1', '#222');
+		document.documentElement.style.setProperty('--theme2', '#555');
+		document.documentElement.style.setProperty('--theme3', '#ddd');
+		document.documentElement.style.setProperty('--theme4', 'rgba(205, 205, 205, 0.6)');
+		document.documentElement.style.setProperty('--theme5', '#325832');
+		document.querySelector(".logoContainer p:last-child").style.color = "#ddd"
+		document.querySelector(".logoContainer p:nth-child(2)").style.color = "#ddd"
+		localStorage.globachatDarkmode = true
+	}
+	function lighten(){
+		document.documentElement.style.setProperty('--theme1', '#fff');
+		document.documentElement.style.setProperty('--theme2', '#ddd');
+		document.documentElement.style.setProperty('--theme3', '#333');
+		document.documentElement.style.setProperty('--theme4', 'rgba(50, 50, 50, 0.6)');
+		document.documentElement.style.setProperty('--theme5', '#8cff8c');
+		document.querySelector(".logoContainer p:last-child").style.color = "#26a"
+		document.querySelector(".logoContainer p:nth-child(2)").style.color = "#084"
+		localStorage.globachatDarkmode = false
+	}
+	darkMode.onclick = function(){
+		if(window.getComputedStyle(this.children[0]).left == "0px"){
+			this.children[0].style.left = "50%";
+			darken()
+		}
+		else{
+			this.children[0].style.left = "0%";
+			lighten()
+			console.log("hehe")
+		}
+	}
+	if(localStorage.globachatDarkmode == "true"){
+		darkMode.children[0].style.left = "50%"
+		darken()
+	}
+	else lighten()
 	
 	// =========================================================================
 	
@@ -566,6 +657,9 @@
 			document.querySelector(".chatFrame").style.display = "block"
 		else if(pageNum == 3)
 			document.querySelector(".youframe").style.display = "block"
+		else if(pageNum == 4)
+			document.querySelector(".appFrame").style.display = "block"
+			
 	}
 	function changeUsername(){
 		let value = usernameInput.value.trim()
@@ -584,13 +678,17 @@
 					
 					localStorage.globachatUsername = value;
 					giveNote("Changed successfully")
+					canChangeUsername = false
+					usernameButton.style.opacity = 0.3
 					fetchData()
 				}
 				verifyUsername()
 			}
 		}
 	}
-	usernameInput.onkeypress = function(ev){if(ev.key == "Enter") changeUsername()}
+	usernameInput.onkeypress = function(ev){
+		if(ev.key == "Enter" && usernameInput.value.trim() != localStorage.globachatUsername) changeUsername()	
+	}
 	function giveNote(text){
 		let elem = document.querySelector(".youframe").children[0].children[1]
 		elem.innerHTML = text
