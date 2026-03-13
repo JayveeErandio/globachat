@@ -436,7 +436,7 @@
 		chatBox.innerHTML = ""
 		kepts.forEach(el => chatBox.appendChild(el));
 
-		const { data, error } = await APICLIENT.from('messages').select('*');
+		const { data, error } = await APICLIENT.from('messages').select('*').order('time');;
 		if (error) {console.error(error); return; }
 
 		setTimeout(function(){
@@ -593,7 +593,7 @@
 	
 	// AUDIOS or SOUNDS
 	const sendAudio = new Audio('audios/send.mp3');
-	sendAudio.volume = 0.3
+	sendAudio.volume = 0.2
 	
 	// =========================================================================
 	
@@ -637,8 +637,6 @@
 		insertData()
 		
 		addChat(content)
-		sendAudio.currentTime = 0
-		sendAudio.play()
 	}
 	
 	function addChat(content, time, sender){
@@ -669,6 +667,10 @@
 			setTimeout(function(){
 				elem.style.transform = "scale(1) translateX(0px)";
 			}, 100)
+		}
+		if(readyToSimulate){
+			sendAudio.currentTime = 0
+			sendAudio.play()
 		}
 		endVerifier()
 	}
