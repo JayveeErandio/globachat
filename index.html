@@ -343,47 +343,43 @@
 	}
 	
 	function formatDateTime(date) {
-  const now = new Date();
+		const now = new Date();
+		
+		function formatTime(d) {
+			let hours = d.getHours();
+			const minutes = d.getMinutes().toString().padStart(2, "0");
+			const ampm = hours >= 12 ? "pm" : "am";
+			hours = hours % 12 || 12; // convert 0 → 12
+			return `${hours}:${minutes} ${ampm}`;
+		}
+		
+		function formatMonthDay(d) {
+			const months = [
+			  "Jan","Feb","Mar","Apr","May","Jun",
+			  "Jul","Aug","Sep","Oct","Nov","Dec"
+			];
+			return `${months[d.getMonth()]} ${d.getDate()}`;
+		}
+		
+		if (
+			date.getFullYear() === now.getFullYear() &&
+			date.getMonth() === now.getMonth() &&
+			date.getDate() === now.getDate()
+		) {
+			return `Today | ${formatTime(date)}`;
+		}
+		
+		const yesterday = new Date();
+		yesterday.setDate(now.getDate() - 1);
+		
+		if (
+			date.getFullYear() === yesterday.getFullYear() &&
+			date.getMonth() === yesterday.getMonth() &&
+			date.getDate() === yesterday.getDate()
+		) {
+			return `Yesterday | ${formatTime(date)}`;
+		}
 
-  // Helper to format time as h:mm am/pm
-  function formatTime(d) {
-    let hours = d.getHours();
-    const minutes = d.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? "pm" : "am";
-    hours = hours % 12 || 12; // convert 0 → 12
-    return `${hours}:${minutes} ${ampm}`;
-  }
-
-  // Helper to format month + day
-  function formatMonthDay(d) {
-    const months = [
-      "January","February","March","April","May","June",
-      "July","August","September","October","November","December"
-    ];
-    return `${months[d.getMonth()]} ${d.getDate()}`;
-  }
-
-  // Check if today
-  if (
-    date.getFullYear() === now.getFullYear() &&
-    date.getMonth() === now.getMonth() &&
-    date.getDate() === now.getDate()
-  ) {
-    return `Today | ${formatTime(date)}`;
-  }
-
-  // Check if yesterday
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-  if (
-    date.getFullYear() === yesterday.getFullYear() &&
-    date.getMonth() === yesterday.getMonth() &&
-    date.getDate() === yesterday.getDate()
-  ) {
-    return `Yesterday | ${formatTime(date)}`;
-  }
-
-  // Other day
-  return `${formatMonthDay(date)} | ${formatTime(date)}`;
-}
+		return `${formatMonthDay(date)} | ${formatTime(date)}`;
+	}
 </script>
