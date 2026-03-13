@@ -1,0 +1,11 @@
+{
+  "name": "GlobaChat",
+  "short_name": "GlobaChat",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0a3",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
