@@ -177,6 +177,8 @@
 	}
 	.chatBox > div {
 		gap: 5px;
+		transition: transform 0.35s;
+		transform: scale(1) translateX(0px);
 	}
 	.chatbox > *:last-child {
 		margin-top: 40px;
@@ -402,6 +404,9 @@
 			</div>
 		</div>
 	</div>
+	<audio>
+		<source src="audios/send.mp3">
+	</audio>
 </body>	
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -586,6 +591,10 @@
 	}
 	else lighten()
 	
+	// AUDIOS or SOUNDS
+	const sendAudio = new Audio('audios/send.mp3');
+	sendAudio.volume = 0.3
+	
 	// =========================================================================
 	
 	
@@ -628,6 +637,8 @@
 		insertData()
 		
 		addChat(content)
+		sendAudio.currentTime = 0
+		sendAudio.play()
 	}
 	
 	function addChat(content, time, sender){
@@ -638,7 +649,13 @@
 			if(time == null)
 				time = formatDateTime(new Date(Date.now()));
 			elem.querySelector(".chatTime").innerHTML = time
+			if(readyToSimulate)
+				elem.style.transform = "scale(0.7) translateX(50px)";
 			document.querySelector(".chatBox").prepend(elem)
+			setTimeout(function(){
+				elem.style.transform = "scale(1) translateX(0px)";
+			}, 100)
+			
 		}
 		else {
 			let elem = document.querySelector(".chatBox").querySelector("#chatTempThem").cloneNode(true)
@@ -646,7 +663,12 @@
 			elem.querySelector(".chatterContent").innerHTML = content
 			elem.querySelector(".chatTime").innerHTML = time
 			elem.querySelector(".chatterName").innerHTML = sender
+			if(readyToSimulate)
+				elem.style.transform = "scale(0.7) translateX(-50px)";
 			document.querySelector(".chatBox").prepend(elem)
+			setTimeout(function(){
+				elem.style.transform = "scale(1) translateX(0px)";
+			}, 100)
 		}
 		endVerifier()
 	}
@@ -675,7 +697,7 @@
 							giveNote("Username already exists.")
 							return
 						}
-					
+				
 					localStorage.globachatUsername = value;
 					giveNote("Changed successfully")
 					canChangeUsername = false
