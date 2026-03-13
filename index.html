@@ -296,6 +296,21 @@
 	const APIURL = "https://npztviwzdcdujmgyjycj.supabase.co";
 	const APIKEY = "sb_publishable_wFEQtPu4jghvDtWSj-2uLw_k76BBthL";
 	const APICLIENT = supabase.createClient(APIURL, APIKEY);
+	APICLIENT.channel('debug-channel')
+		.on(
+			'postgres_changes',
+			{ event: '*', schema: 'public', table: 'messages' },
+			payload => detectSync(payload)
+		)
+		.subscribe(status => {
+			//console.log('Subscription status:', status);
+	});
+	function detectSync(event){
+		if(event.eventType == "INSERT"){
+			if(event.new.sender != localStorage.globachatUsername)
+				addChat(event.new.content, formatDateTime(new Date(event.new.time)), event.new.sender)
+		}
+	}
 	async function fetchData() {
 		const { data, error } = await APICLIENT.from('messages').select('*');
 		if (error) {console.error(error); return; }
