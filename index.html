@@ -236,6 +236,49 @@
 	body > img:first-child {
 		z-index: 0
 	}
+	.blurText {
+		color: rgba(50, 50, 50, 0.6);
+	}
+	.youframe {
+		position: fixed;
+		height: 100%;
+		width: 100%;
+		display: none
+	}
+	.youframe > div {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	.usernameForm input {
+		padding: 7px;
+		font-size: 104%;
+		outline: none;
+		border-radius: 5px;
+		border: none;
+	}
+	.youframe h6 {
+		margin-bottom: 3px;
+		margin-top: 3px;
+	}
+	.youframe h6:last-child {
+		color: #c33;
+		text-align: center;
+		font-weight:500;
+		height: 60px;
+	}
+	.youframe button {
+		margin-left: 50%;
+		transform: translateX(-50%);
+		margin-top: 20px;
+		margin-bottom: 20px;
+		padding: 5px 12px 5px 12px;
+		font-size: 105%;
+		background: #193;
+		opacity: 0.3;
+		border-radius: 5px;
+	}
 </style>
 <body>
 	<img class="backImg" src="images/mountain.jpg">
@@ -249,15 +292,15 @@
 			</div>
 			<div class="navBar colTheme2">
 				<div class="tabHead colTheme1"></div>
-				<div class="texTheme1">
-					<p>Info</p>
-					<p>Chat</p>
-					<p>You</p>
-					<p>App</p>
+				<div>
+					<p class="blurText">Info</p>
+					<p class="selectedText">Chat</p>
+					<p class="blurText">You</p>
+					<p class="blurText">App</p>
 				</div>
 			</div>
 		</div>
-		<div class="chatFrame">
+		<div class="chatFrame page">
 			<div class="chatBox">
 				<div class="theirChat" id="chatTempThem">
 					<div class="colTheme1">
@@ -291,8 +334,20 @@
 				<p id="charSignifier">150 characters left</p>
 			</div>
 		</div>
+		<div class="page youframe colTheme2">
+			<div>
+				<div>
+					<div class="usernameForm">
+						<h6 class="texTheme1">Your username</h6>
+						<input required>
+					</div>
+					<button onclick="changeUsername()">Change</button>
+				</div>
+				<h6>Note: Changing your username will disassociate your past chats. Once done, you cannot bring back your old username.</h6>
+			</div>
+		</div>
 	</div>
-</body>
+</body>	
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 	// INITIALIZATION SETUP
@@ -315,7 +370,12 @@
 				addChat(event.new.content, formatDateTime(new Date(event.new.time)), event.new.sender)
 		}
 	}
+	const chatBox = document.querySelector(".chatBox")
 	async function fetchData() {
+		let kepts = Array.from(chatBox.children).slice(-3);
+		chatBox.innerHTML = ""
+		kepts.forEach(el => chatBox.appendChild(el));
+
 		const { data, error } = await APICLIENT.from('messages').select('*');
 		if (error) {console.error(error); return; }
 
@@ -330,7 +390,8 @@
 	}
 	fetchData();
 	
-	//   USER'S USERNAME
+	
+	//   USER'S USERNAME =================================
 	async function setupUsername(){
 		if(localStorage.globachatUsername) return;
 		const res = await fetch("https://api.api-ninjas.com/v2/randomuser?count=1", {
@@ -341,8 +402,9 @@
 		localStorage.globachatUsername = data[0].username
 	}
 	setupUsername()
+	document.querySelector(".usernameForm input").value = localStorage.globachatUsername
 
-	//   UI LAYOUT MANAGEMENT
+	//   UI LAYOUT MANAGEMENT ===========================
 	for (const sheet of document.styleSheets) {
 		for (const rule of sheet.cssRules) {
 			if (rule.selectorText === ".theirChat") {
@@ -358,6 +420,25 @@
 			endofmessage.style.opacity = 0.5
 	}
 	setTimeout(endVerifier, 2500);
+	
+	const navs = document.querySelector(".navBar div:last-child").children;
+
+	for(i in navs){
+		if(navs[i] instanceof HTMLParagraphElement){
+			let temp = i
+			navs[i].onclick = function(){
+				document.querySelector(".tabHead").style.left = temp*25 + "%"
+				changePage(parseInt(temp) + 1)
+				for(j of navs){
+					navs[temp].classList.remove("texTheme1");
+					j.classList.add("blurText");
+				}
+				navs[temp].classList.remove("blurText");
+				navs[temp].classList.add("texTheme1");
+			}
+		}
+	}
+	
 	const imagesToPreload = [
 	  "images/mountain.jpg",
 	  "images/snow.jpg",
@@ -401,6 +482,18 @@
 		}
 	}
 	
+	let canChangeUsername = false
+	const usernameInput = document.querySelector(".youframe input")
+	const usernameButton = document.querySelector(".youframe button")
+	usernameInput.oninput = function(){
+		canChangeUsername = false
+		if(usernameInput.value == localStorage.globachatUsername)
+			usernameButton.style.opacity = 0.3
+		else{
+			canChangeUsername = true
+			usernameButton.style.opacity = 1
+		}
+	}
 	
 	// =========================================================================
 	
@@ -465,6 +558,45 @@
 			document.querySelector(".chatBox").prepend(elem)
 		}
 		endVerifier()
+	}
+	function changePage(pageNum){
+		for(page of document.querySelectorAll(".page"))
+			page.style.display = "none"
+		if(pageNum == 2)
+			document.querySelector(".chatFrame").style.display = "block"
+		else if(pageNum == 3)
+			document.querySelector(".youframe").style.display = "block"
+	}
+	function changeUsername(){
+		let value = usernameInput.value.trim()
+		if(canChangeUsername){
+			if(!value)
+				giveNote("Blank is not valid.")
+			else{
+				async function verifyUsername(){
+					const { data, error } = await APICLIENT.from('messages').select('sender');
+					
+					for(i of data)
+						if(i.sender == value){
+							giveNote("Username already exists.")
+							return
+						}
+					
+					localStorage.globachatUsername = value;
+					giveNote("Changed successfully")
+					fetchData()
+				}
+				verifyUsername()
+			}
+		}
+	}
+	usernameInput.onkeypress = function(ev){if(ev.key == "Enter") changeUsername()}
+	function giveNote(text){
+		let elem = document.querySelector(".youframe").children[0].children[1]
+		elem.innerHTML = text
+		setTimeout(function(){
+			elem.innerHTML = "Note: Changing your username will disassociate your past chats. Once done, you cannot bring back your old username."
+		}, 1200)
 	}
 	
 	function formatDateTime(date) {
