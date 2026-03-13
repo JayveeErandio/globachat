@@ -225,7 +225,11 @@
 		border-radius: 9px 9px 9px 0px;
 	}
 	#chatTempYou, #chatTempThem {
-		display: none
+		animation: anim 0.05s forwards;
+	}
+	@keyframes anim {
+		0% {display: block}
+		100% {display: none}
 	}
 </style>
 <body>
@@ -339,6 +343,13 @@
 				elem.querySelector(".chatTime").innerHTML = formatDateTime(new Date(Date.now()))
 				document.querySelector(".chatBox").prepend(elem)
 			}
+		}
+		else {
+			let elem = document.querySelector(".chatBox").querySelector("#chatTempThem").cloneNode(true)
+			elem.setAttribute("id", "")
+			elem.querySelector(".chatterContent").innerHTML = content
+			elem.querySelector(".chatTime").innerHTML = formatDateTime(new Date(Date.now()))
+			document.querySelector(".chatBox").prepend(elem)
 		}
 		endVerifier()
 	}
