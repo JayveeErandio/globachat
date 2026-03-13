@@ -170,6 +170,7 @@
 		text-shadow: 0px 0px 5px black;
 		opacity: 0;
 		text-align: center;
+		background: red
 	}
 	.chatbox > *:first-child {
 		margin-bottom: 70px;
@@ -225,7 +226,8 @@
 		border-radius: 9px 9px 9px 0px;
 	}
 	#chatTempYou, #chatTempThem {
-		animation: anim 0.05s forwards;
+		animation: anim 0.5s forwards;
+		opacity: 0;
 	}
 	@keyframes anim {
 		0% {display: block}
@@ -287,8 +289,39 @@
 		</div>
 	</div>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 	// INITIALIZATION SETUP
+	// 	 DATABASE API CONNECTION
+	const APIURL = "https://npztviwzdcdujmgyjycj.supabase.co";
+	const APIKEY = "sb_publishable_wFEQtPu4jghvDtWSj-2uLw_k76BBthL";
+	const APICLIENT = supabase.createClient(APIURL, APIKEY);
+	async function fetchData() {
+		const { data, error } = await APICLIENT.from('messages').select('*');
+		if (error) {console.error(error); return; }
+
+		data.forEach(chat => {
+			if(chat.sender == localStorage.globachatUsername)
+				addChat(chat.content, formatDateTime(new Date(chat.time)))
+			else
+				addChat(chat.content, formatDateTime(new Date(chat.time)), chat.sender)
+		});
+	}
+	fetchData();
+	
+	//   USER'S USERNAME
+	async function setupUsername(){
+		if(localStorage.globachatUsername) return;
+		const res = await fetch("https://api.api-ninjas.com/v2/randomuser?count=1", {
+			headers: {"X-Api-Key": "lPzf0xHLNze5XSX42E5FVms2fnu9pHxq8Tlf6Aev"}
+		});
+		const data = await res.json();
+		
+		localStorage.globachatUsername = data[0].username
+	}
+	setupUsername()
+
+	//   UI LAYOUT MANAGEMENT
 	for (const sheet of document.styleSheets) {
 		for (const rule of sheet.cssRules) {
 			if (rule.selectorText === ".theirChat") {
@@ -296,11 +329,14 @@
 			}
 		}
 	}
+	let readyToSimulate = false
+	setTimeout(function(){readyToSimulate = true}, 1500);
 	function endVerifier(){
+		if (!readyToSimulate) return
 		if(endofmessage.getBoundingClientRect().top <= document.querySelector(".header").clientHeight)
 			endofmessage.style.opacity = 0.5
 	}
-	endVerifier()
+	setTimeout(endVerifier, 2500);
 	
 	chatInput.addEventListener('input', function() {
 		syncChatSize();
@@ -331,24 +367,34 @@
 		chatInput.value = '';
 		syncChatSize();
 		charSignifier.innerHTML = (150 - chatInput.value.length) + " characters left"
+		
+		async function insertData() {
+			const { data, error } = await APICLIENT.from('messages').insert([
+				{sender: localStorage.globachatUsername, content: content}
+			  ]);
+			if (error) {console.error(error); return; }
+		}
+		insertData()
+		
 		addChat(content)
 	}
 	
 	function addChat(content, time, sender){
 		if(sender == null){
-			if(time == null){
-				let elem = document.querySelector(".chatBox").querySelector("#chatTempYou").cloneNode(true)
-				elem.setAttribute("id", "")
-				elem.querySelector(".chatterContent").innerHTML = content
-				elem.querySelector(".chatTime").innerHTML = formatDateTime(new Date(Date.now()))
-				document.querySelector(".chatBox").prepend(elem)
-			}
+			let elem = document.querySelector(".chatBox").querySelector("#chatTempYou").cloneNode(true)
+			elem.setAttribute("id", "")
+			elem.querySelector(".chatterContent").innerHTML = content
+			if(time == null)
+				time = formatDateTime(new Date(Date.now()));
+			elem.querySelector(".chatTime").innerHTML = time
+			document.querySelector(".chatBox").prepend(elem)
 		}
 		else {
 			let elem = document.querySelector(".chatBox").querySelector("#chatTempThem").cloneNode(true)
 			elem.setAttribute("id", "")
 			elem.querySelector(".chatterContent").innerHTML = content
-			elem.querySelector(".chatTime").innerHTML = formatDateTime(new Date(Date.now()))
+			elem.querySelector(".chatTime").innerHTML = time
+			elem.querySelector(".chatterName").innerHTML = sender
 			document.querySelector(".chatBox").prepend(elem)
 		}
 		endVerifier()
@@ -395,4 +441,3 @@
 		return `${formatMonthDay(date)} | ${formatTime(date)}`;
 	}
 </script>
-
