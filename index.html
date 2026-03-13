@@ -1,6 +1,8 @@
 <head>
 	<title>GlobaChat</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="manifest" href="manifest.json" />
+	<link rel="icon" href="images/logo.png"/>
 </head>
 <style>
 	@font-face {
@@ -324,6 +326,12 @@
 		left: 0%;
 		transition: left 0.2s;
 	}
+	.installButton {
+		padding: 5px 12px 5px 12px;
+		margin-top: 18px;
+		border-radius: 5px;
+		font-weight: bold;
+	}
 	.infoFrame {
 		position: fixed;
 		width: calc(100% - 54px);
@@ -418,7 +426,7 @@
 						<p>Dark</p>
 					</div>
 				</div>
-				<button style="display: none">Install the app</button>
+				<button class="installButton">Install the app</button>
 			</div>
 		</div>
 		<div class="page infoFrame">
@@ -629,6 +637,27 @@
 	const sendAudio = new Audio('audios/send.mp3');
 	sendAudio.volume = 0.2
 	
+	//INSTALLATION
+	if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('service-worker.js')
+			.then();
+	}
+	let deferredPrompt;
+	window.addEventListener('beforeinstallprompt', function(e) {
+		e.preventDefault();
+		deferredPrompt = e;
+
+		const installBtn = document.querySelector('.installButton');
+
+		installBtn.addEventListener('click', async () => {
+			deferredPrompt.prompt();
+			const choiceResult = await deferredPrompt.userChoice;
+			deferredPrompt = null;
+		});
+	});
+	window.addEventListener('appinstalled', function(){
+		document.querySelector('.installButton').style.display = "none"
+	} )
 	// =========================================================================
 	
 	
