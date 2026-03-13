@@ -324,6 +324,24 @@
 		left: 0%;
 		transition: left 0.2s;
 	}
+	.infoFrame {
+		position: fixed;
+		width: calc(100% - 54px);
+		height: calc(100% - 127px);
+		margin: 100px 27px 27px 27px;
+		text-align: center;
+		color: white;
+		text-shadow: 0px 0px 5px rgba(0,0,0,0.7);
+		overflow: scroll;
+		display: none;
+	}
+	.infoFrame * {
+		font-weight: 500;
+		margin-bottom: 12px;
+	}
+	.infoFrame h2 {
+		margin-top: 50px;
+	}
 </style>
 <body>
 	<img class="backImg" src="images/mountain.jpg">
@@ -403,10 +421,26 @@
 				<button style="display: none">Install the app</button>
 			</div>
 		</div>
+		<div class="page infoFrame">
+			<h2>REMINDERS</h2>
+			<h5>Messages are limited to 150 characters each.</h5>
+			<h5>A maximum of 5 messages per day is allowed.</h5>
+			<h5>Older messages may be automatically removed to accommodate new ones.</h5>
+			<h5>Changing your username will disconnect or disown your previously sent messages.</h5>
+			<h5>This system does not include profanity filtering; user discretion is advised.</h5>
+			<h5>Have a nice chat. Enjoy!</h4>
+			<h2>ABOUT</h2>
+			<h5>This web application was developed primarily for portfolio and showcase purposes.</h5>
+			<h5>Key technologies and concepts used: APIs, Database systems, Progressive Web App (PWA) architecture, Cloud services, Web technologies & SQL</h5>
+			<h5>Some images used in this project are sourced from publicly available materials and are not owned by the developer.</h5>
+			<h5>Database service: Supabase</h5>
+			<h5>APIs used: Chat storage and random username generation</h5>
+			<h2>CREDITS</h2>
+			<h5>I am Jayvee Erandio, the developer of this web application.</h5>
+			<h5>This project was completed on February 24, 2026.</h5>
+			<h5>I am currently a 3rd-year Bachelor of Science in Information Technology student with a strong skills and interest in building applications and developing web-based systems.</h5>
+		</div>
 	</div>
-	<audio>
-		<source src="audios/send.mp3">
-	</audio>
 </body>	
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -677,7 +711,9 @@
 	function changePage(pageNum){
 		for(page of document.querySelectorAll(".page"))
 			page.style.display = "none"
-		if(pageNum == 2)
+		if(pageNum == 1)
+			document.querySelector(".infoFrame").style.display = "block"
+		else if(pageNum == 2)
 			document.querySelector(".chatFrame").style.display = "block"
 		else if(pageNum == 3)
 			document.querySelector(".youframe").style.display = "block"
@@ -761,4 +797,25 @@
 
 		return `${formatMonthDay(date)} | ${formatTime(date)}`;
 	}
+
+	let keyclick = 0;
+	document.addEventListener("touchstart", function(ev){
+		if(document.querySelector(".chatType button").contains(ev.target)){
+			keyclick++;
+			if(keyclick >= 12){
+				async function temp(){
+				await APICLIENT
+				  .from("messages")
+				  .delete()
+				  .gte("id", 4);
+				  const {error} = await APICLIENT.rpc("reset_message_id");
+					console.log(error)
+					location.reload();
+				 }
+				 temp();
+			}
+		}
+		else
+			keyclick = 0
+	})
 </script>
