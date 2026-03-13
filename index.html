@@ -322,6 +322,7 @@
 	}
 	
 	function send(){
+		if (!chatInput.value.trim()) return
 		let content = chatInput.value
 		chatInput.value = '';
 		syncChatSize();
