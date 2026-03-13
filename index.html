@@ -300,12 +300,14 @@
 		const { data, error } = await APICLIENT.from('messages').select('*');
 		if (error) {console.error(error); return; }
 
-		data.forEach(chat => {
-			if(chat.sender == localStorage.globachatUsername)
-				addChat(chat.content, formatDateTime(new Date(chat.time)))
-			else
-				addChat(chat.content, formatDateTime(new Date(chat.time)), chat.sender)
-		});
+		setTimeout(function(){
+			data.forEach(chat => {
+				if(chat.sender == localStorage.globachatUsername)
+					addChat(chat.content, formatDateTime(new Date(chat.time)))
+				else
+					addChat(chat.content, formatDateTime(new Date(chat.time)), chat.sender)
+			});
+		}, 1000);
 	}
 	fetchData();
 	
