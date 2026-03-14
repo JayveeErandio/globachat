@@ -1,8 +1,14 @@
 self.addEventListener('install', event => {
-  console.log('Service worker installed');
+  event.waitUntil(
+    caches.open('my-cache').then(cache => {
+      return cache.addAll([
+        './',
+		'./index.html',
+      ]);
+    })
+  );
 });
 
 self.addEventListener('fetch', event => {
-  // minimal fetch handler
   event.respondWith(fetch(event.request));
 });
