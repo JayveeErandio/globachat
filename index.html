@@ -452,6 +452,7 @@
 </body>	
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+	console.log(location.href)
 	// INITIALIZATION SETUP
 	// 	 DATABASE API CONNECTION
 	const APIURL = "https://npztviwzdcdujmgyjycj.supabase.co";
@@ -639,7 +640,7 @@
 	
 	//INSTALLATION
 	if ('serviceWorker' in navigator) {
-		navigator.serviceWorker.register('service-worker.js')
+		navigator.serviceWorker.register('./service-worker.js')
 			.then();
 	}
 	let deferredPrompt;
@@ -655,6 +656,10 @@
 			deferredPrompt = null;
 		});
 	});
+	setTimeout(function(){
+		if(!deferredPrompt)
+			document.querySelector('.installButton').style.display = "none"	
+	},300);
 	window.addEventListener('appinstalled', function(){
 		document.querySelector('.installButton').style.display = "none"
 	} )
