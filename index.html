@@ -131,9 +131,7 @@
 	}
 	.chatType textarea {
 		flex: 1;
-		border: none;
 		overflow: hidden;
-		outline: none;
 		font-size: 110%;
 	}
 	.chatType > p {
@@ -150,6 +148,8 @@
 		background: none;
 		padding: 7px;
 		box-sizing: border-box;
+		border: none;
+		outline: none;
 	}
 	button {
 		border: none;
@@ -350,6 +350,46 @@
 	.infoFrame h2 {
 		margin-top: 50px;
 	}
+	.editModal {
+		position: fixed;
+		z-index: 2;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, 0.5);
+		display: none;
+	}
+	.editModal > div {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		display: flex;
+		flex-direction: column;
+		padding: 12px;
+		border-radius: 7px;
+	}
+	.editModal button {
+		font-size: 105%;
+		padding: 7px 18px 7px 18px;
+		border-radius: 5px;
+		width: 120px;
+	}
+	.editModal div:has(button) {
+		width: max-content;
+		gap: 18px;
+		display: flex;
+	}
+	.editModal textarea {
+		font-size: 105%;
+		height: 120px;
+	}
+	.editModal button:first-child {
+		background: none;
+		border: 2px solid #555;
+	}
+	.doneButton {
+		opacity: 0.5
+	}
 </style>
 <body>
 	<img class="backImg" src="images/mountain.jpg">
@@ -383,7 +423,7 @@
 				<div class="yourChat" id="chatTempYou">
 					<div>
 						<div>
-							<img src="icons/edit.svg">
+							<img class="editButton" src="icons/edit.svg">
 							<img src="icons/delete.svg">
 						</div>
 						<div class="colTheme3">
@@ -403,6 +443,15 @@
 					<p>Send</p>
 				</button>
 				<p id="charSignifier">150 characters left</p>
+			</div>
+			<div class="editModal">
+				<div class="colTheme1">
+					<textarea class="colTheme2 texTheme1"></textarea>
+					<div>
+						<button onclick="hideEditModal()">Cancel</button>
+						<button class="doneButton" onclick="doneEdit()">Done</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="page youframe colTheme2">
@@ -452,7 +501,6 @@
 </body>	
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-	console.log(location.href)
 	// INITIALIZATION SETUP
 	// 	 DATABASE API CONNECTION
 	const APIURL = "https://npztviwzdcdujmgyjycj.supabase.co";
@@ -470,7 +518,7 @@
 	function detectSync(event){
 		if(event.eventType == "INSERT"){
 			if(event.new.sender != localStorage.globachatUsername)
-				addChat(event.new.content, formatDateTime(new Date(event.new.time)), event.new.sender)
+				addChat(event.new.id, event.new.content, formatDateTime(new Date(event.new.time)), event.new.sender)
 		}
 	}
 	const chatBox = document.querySelector(".chatBox")
@@ -485,9 +533,9 @@
 		setTimeout(function(){
 			data.forEach(chat => {
 				if(chat.sender == localStorage.globachatUsername)
-					addChat(chat.content, formatDateTime(new Date(chat.time)))
+					addChat(chat.id, chat.content, formatDateTime(new Date(chat.time)), null, chat.is_edited)
 				else
-					addChat(chat.content, formatDateTime(new Date(chat.time)), chat.sender)
+					addChat(chat.id, chat.content, formatDateTime(new Date(chat.time)), chat.sender, chat.is_edited)
 			});
 		}, 1000);
 	}
@@ -607,7 +655,7 @@
 		document.querySelector(".logoContainer p:nth-child(2)").style.color = "#ddd"
 		localStorage.globachatDarkmode = true
 	}
-	console.log("Hello, I am Jayvee Erandio, the developer of this web application. Please do not copy, distribute, or falsely claim ownership of this application. A significant amount of time and effort has been invested in building this project. I kindly ask everyone to respect the work behind it. Let’s promote creativity, respect, and positivity. Thank you.")
+	console.log("Hello, I am Jayvee Erandio, the developer of this web application. Please do not copy, distribute, or falsely claim ownership of this application. A significant amount of time and effort has been invested in building this project. I kindly ask everyone to respect the work behind it. Let us promote creativity, respect, and positivity. Thank you.")
 	function lighten(){
 		document.documentElement.style.setProperty('--theme1', '#fff');
 		document.documentElement.style.setProperty('--theme2', '#ddd');
@@ -704,31 +752,43 @@
 		}
 		insertData()
 		
-		addChat(content)
+		addChat(null, content)
 	}
-	
-	function addChat(content, time, sender){
+	let chatID = 1;
+	function addChat(id, content, time, sender, isEdited){
 		if(sender == null){
 			let elem = document.querySelector(".chatBox").querySelector("#chatTempYou").cloneNode(true)
-			elem.setAttribute("id", "")
+			
+			chatID++;
+			elem.setAttribute("id", id)
 			elem.querySelector(".chatterContent").innerHTML = content
+			elem.querySelector(".editButton").onclick = function(){
+				elem.setAttribute("curEdit", true)
+				showEditModal(elem.querySelector(".chatterContent").innerHTML);
+			}
 			if(time == null)
 				time = formatDateTime(new Date(Date.now()));
-			elem.querySelector(".chatTime").innerHTML = time
+			if(isEdited)
+				elem.querySelector(".chatTime").innerHTML = "(Edited) " + time
+			else
+				elem.querySelector(".chatTime").innerHTML = time
 			if(readyToSimulate)
 				elem.style.transform = "scale(0.7) translateX(50px)";
 			document.querySelector(".chatBox").prepend(elem)
 			setTimeout(function(){
 				elem.style.transform = "scale(1) translateX(0px)";
 			}, 100)
-			
 		}
 		else {
 			let elem = document.querySelector(".chatBox").querySelector("#chatTempThem").cloneNode(true)
-			elem.setAttribute("id", "")
+			elem.setAttribute("id", id)
 			elem.querySelector(".chatterContent").innerHTML = content
 			elem.querySelector(".chatTime").innerHTML = time
 			elem.querySelector(".chatterName").innerHTML = sender
+			if(isEdited)
+				elem.querySelector(".chatTime").innerHTML = "(Edited) " + time
+			else
+				elem.querySelector(".chatTime").innerHTML = time
 			if(readyToSimulate)
 				elem.style.transform = "scale(0.7) translateX(-50px)";
 			document.querySelector(".chatBox").prepend(elem)
@@ -738,9 +798,58 @@
 		}
 		if(readyToSimulate){
 			sendAudio.currentTime = 0
-			sendAudio.play()
+			try{sendAudio.play()} 
+			catch {}
 		}
 		endVerifier()
+	}
+	const editModal = document.querySelector(".editModal")
+	function showEditModal(curValue){
+		localStorage.globachatCurvalue = curValue;
+		editModal.querySelector("textarea").value = curValue;
+		editModal.style.display = "block"
+	}
+	function validateEdit(){
+		let temp = editModal.querySelector("textarea")
+		if(temp.value != localStorage.globachatCurvalue && temp.value.trim() != "")
+			return true
+	}
+	editModal.querySelector("textarea").oninput = function(){
+		let doneBut = document.querySelector(".doneButton")
+		if(validateEdit())
+			doneBut.style.opacity = 1;
+		else
+			doneBut.style.opacity = 0.5;
+	}
+	function hideEditModal(){
+		editModal.style.display = "none"
+	}
+	function doneEdit(){
+		if(validateEdit()){
+			for(chat of document.querySelectorAll(".yourChat")){
+				if(chat.getAttribute("curEdit") == "true"){
+					let value = editModal.querySelector("textarea").value
+					async function start() {
+						const { data, error } = await APICLIENT
+							.from('messages')
+							.update({ content: value, is_edited: true })
+							.eq('id', parseInt(chat.getAttribute("id")));
+					}
+					start()
+					chat.style.transition = "transform 0s"
+					chat.style.transform = "translate(50px) scale(0.7)"
+					chat.querySelector(".chatTime").innerHTML = "(Edited) " + chat.querySelector(".chatTime").innerHTML
+					setTimeout(function(){
+						chat.style.transition = "transform 0.35s"
+						chat.querySelector(".chatterContent").innerHTML = value
+						chat.style.transform = "translate(0px) scale(1)"
+					}, 70);
+					chat.setAttribute("curEdit", false)
+					break
+				}
+			}
+			editModal.style.display = "none"
+		}
 	}
 	function changePage(pageNum){
 		for(page of document.querySelectorAll(".page"))
@@ -790,7 +899,6 @@
 			elem.innerHTML = "Note: Changing your username will disassociate your past chats. Once done, you cannot bring back your old username."
 		}, 1200)
 	}
-	
 	function formatDateTime(date) {
 		const now = new Date();
 		
